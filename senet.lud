@@ -1,0 +1,59 @@
+(game "Senet"
+  (players 2)  
+  (equipment 
+  { 
+    (senetBoard)
+    (dice D2 4 start:0)
+    (hand Each)
+
+    (track "Track1" "30,20,E,S1,W,S1,E,End" 1 directed:true)
+    (track "Track2" "31,20,E,S1,W,S1,E,End" 2 directed:true)
+    (map { {0 5} })
+    (regions "Protect" {15})
+    (regions "Replay" {5})
+    (regions "Dead" {6})
+    
+    (piece "SenetPiece" Each 
+    					(if (= (ForwardOnTrack (map (sumDice))) End)
+    						(select (from) (then (Remove (lastToMove))))
+    						(if (not (= (ForwardOnTrack (map (sumDice))) Off) )  			
+    							(if 
+    								(if (in (ForwardOnTrack (map (sumDice))) (region "Protect"))
+    									(in (ForwardOnTrack (map (sumDice))) (empty))
+    									(not (isFriend (who (ForwardOnTrack (map (sumDice))) )))
+    								)
+    								(fromTo (from) (ForwardOnTrack (map (sumDice))) rule:true condition:(isEnemy (who (to))) effect:(fromTo (to) (hand Next))
+    									(then (if (in (lastToMove) (region "Protect")) (moveAgain) (if (in (lastToMove) (region "Dead")) (fromTo (lastToMove) (hand Mover))) ))
+    								)
+    							)
+    						)
+    					)
+    ) 
+    
+  }
+  )  
+  
+  (rules 
+   (start 
+   { 	
+   (place "SenetPiece1" (hand P1) count:5)
+   (place "SenetPiece2" (hand P2) count:5)
+    }
+   )	
+    
+    (play (or (byPiece) (byPiece container:(mover)) (then (roll))))
+
+    (end
+    {
+   		(if (isEmpty (occupiedBy P1)) (result P1 Win))  
+    	(if (isEmpty (occupiedBy P2)) (result P2 Win))  
+    }
+    )
+  )
+)
+
+(metadata
+  { "rules"	"This ancient game has many reconstruction, here we follow the rules of Murray. More information can be found here: https://en.wikipedia.org/wiki/Senet."}
+  { "P2PieceNameExtension" "2"}
+  { "Source" "https://en.wikipedia.org/wiki/Senet (one possible variant, I have to check with Walter)"}
+) 

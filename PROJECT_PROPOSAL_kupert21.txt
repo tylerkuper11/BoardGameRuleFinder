@@ -1,0 +1,7 @@
+	My Capstone project is going to be based off of the digital ludeme project which is a program that
+takes the components and parameters of a board game and uses those things to predict the rules for said
+board game. I would start out with a one-dimensional game to start out with and see if my program could 
+predict the rules for it and then work my way up to more advanced games like maybe chess or checkers.
+	A big challenge that would be in the way would be:
+		-Creating the programs way of determining rules
+		-Having the program work with two or three dimensional games
