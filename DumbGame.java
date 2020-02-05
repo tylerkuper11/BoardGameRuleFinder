@@ -1,3 +1,4 @@
+import java.util.*;
 
 public class DumbGame 
 {
@@ -10,26 +11,39 @@ public class DumbGame
 	public static void gameBoard()
 	{
 		int row,col;
-		char[][] boardGame = new char[7][11];
-		for(row=0; row<boardGame.length;row++){
-			for(col=0; col<boardGame[row].length;col++){
-				if(row==0)
-					boardGame[row][col]=(char)('A'+col);
-				else if(col==0)
-					boardGame[row][col]=(char)('A'+row);
-				else
-					boardGame[row][col]='*';
+		int board[][] = new int[6][8];
+		for(row=0; row<board.length;row++){
+			for(col=0; col<board[row].length;col++){
+				board[row][col]=0;
 			}
 		}
-
-		for(row=0; row<boardGame.length;row++){
+		Player player1 = new Player();
+		Player player2 = new Player();
+		
+		for(row=0; row<board.length;row++){
 			System.out.println();
-		for(col=0; col<boardGame[row].length;col++){
-			System.out.print(boardGame[row][col]);
+		for(col=0; col<board[row].length;col++){
+			System.out.print(board[row][col]);
+		
 		}
 		}
 	}
 	
+
+	private int die; // Create the die
 	
+	public void roll() 
+	{
+            die = (int)(Math.random()*6) + 1;
+    }
+    
+
+   
+ 
 }
+
+
+
+
+
 
