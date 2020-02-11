@@ -1,5 +1,5 @@
 import java.util.*;
-
+import java.util.ArrayList; 
 
 
 public class DumbGame 
@@ -16,17 +16,27 @@ public class DumbGame
 	int moveCost=1;
 	int attackCost=2;
 	int attackTarget;
+	ArrayList<Integer> xPieces = new ArrayList<Integer>();
+	ArrayList<Integer> oPieces = new ArrayList<Integer>();	
+	ArrayList<Integer> xLoc = new ArrayList<Integer>();	
+	ArrayList<Integer> oLoc = new ArrayList<Integer>();	
 
 	public DumbGame()
 	{
 		board= new int[16];
-		//~ for(int i=0;i<pieceCount;i++)
-		//~ {
-			//~ board[i]=X;
-			//~ board[board.length-1-i]=O;
-		//~ }
-		board[0] = X;
-		board[board.length-1]=O;
+		
+		for(int i=0;i<pieceCount;i++)
+		{
+			xPieces.add(X);
+			xLoc.add(i);
+			board[i]=xPieces.get(i);
+		}
+		for(int i=0;i<pieceCount;i++)
+		{
+			oPieces.add(O);
+			oLoc.add(board.length-1-i);
+			board[board.length-1-i]=oPieces.get(i);
+		}
 		playerEnergy = energy;
 	}
 	
@@ -48,36 +58,59 @@ public class DumbGame
 		else return -1;
 	}
 	
-	public int getLocation(int token)
+	
+	//~ public int getLocation(int token, int piece)
+	//~ {
+		//~ for(int i=0;i<board.length;i++)
+		//~ {
+			//~ if(token==X){
+				//~ if(board[i]==xPieces.get(piece))return i;
+			//~ }else if(token==O){
+				//~ if(board[i]==oPieces.get(piece))return i;
+			//~ }
+		//~ }
+		//~ return -1;
+		
+	//~ }
+	
+	public int getLocation(int token, int piece)
 	{
-		for(int i=0;i<board.length;i++) if(board[i]==token)return i;
-		return -1;
+		if (token==X) 
+		{
+			return xLoc.get(piece);
+		} else {
+			return oLoc.get(piece);
+		}
 	}
 	//~ public boolean isValid(int[] move)
 	
-	public void play(boolean useDieOne)
+	public void play(boolean useDieOne, int piece)
 	{
-		if(useDieOne) slide(getPlayer());
-		else attack(getPlayer());
+		if(useDieOne) slide(getPlayer(),piece);
+		else attack(getPlayer(), piece);
 
 	}
 	
-	public boolean slide(int token)
+	public boolean slide(int token, int piece)
 	{
-		int currentLocation=getLocation(token);
+		int currentLocation=getLocation(token,piece);
 		int target=currentLocation+getDirection(token);
 		if (playerEnergy >= 1)
 		{
 			if(target<0 || target>=board.length)
 			return false;
-			board[currentLocation]=0;
 			if(board[target]>0)
 			{
-				//~ if(getDirection(token)>0)board[0]=board[target];
-				//~ else board[board.length-1]=board[target];
 				return false;
 			}
+			board[currentLocation]=0;
 			board[target]=token;
+			if (token==X)
+			{
+				xLoc.set(piece,currentLocation+getDirection(token));
+			}else{
+				oLoc.set(piece,currentLocation+getDirection(token));
+			}
 			playerEnergy--;
 			return true;
 		} else {
@@ -85,13 +118,13 @@ public class DumbGame
 		}
 	}
 	
-	public boolean attack(int token)
+	public boolean attack(int token, int piece)
 	{
-		int currentLocation=getLocation(token);
+		int currentLocation=getLocation(token,piece);
 		if(token == 1) {
-			attackTarget = getLocation(token) + 1;
+			attackTarget = getLocation(token,piece) + 1;
 		}else{
-			attackTarget = getLocation(token) - 1;
+			attackTarget = getLocation(token,piece) - 1;
 		}
 		if (board[attackTarget]!=token && board[attackTarget]>0)
 		{
@@ -132,22 +165,30 @@ public class DumbGame
 	}
 	
 	public static void main(String[] args)
-	{
+	{		
 		Scanner sc=new Scanner(System.in);
+		Scanner pc=new Scanner(System.in);
 		DumbGame game=new DumbGame();
+		
+		
 		System.out.println(game);
 		while(game.getWinner()==0)
 		{
 			System.out.println(game.getPlayerCharacter()+" turn");
+			System.out.printf("+---------------------------+\n");
+			System.out.printf("| A move costs %d energy     |\n",game.moveCost);
+			System.out.printf("| An attack costs %d energy  |\n",game.attackCost);
+			System.out.printf("+---------------------------+\n");
 			while (game.playerEnergy >0) {
 				System.out.println(game);
-				System.out.printf("A move costs %d\n",game.moveCost);
-				System.out.printf("An attack costs %d\n",game.attackCost);
-				System.out.printf("Your energy is: %d\n", game.energy);
+				System.out.printf("Your energy is: %d\n", game.playerEnergy);
+				System.out.printf("Which piece would you like to move?\n");	
+				System.out.printf("Enter a number piece from 0-%d\n", game.pieceCount-1);	
+				int pieceChoice=pc.nextInt();
 				System.out.printf("Would you like to move or attack?\n");
 				System.out.printf("Move is 1\nAttack is 2\n");
-				int choice=sc.nextInt();
-				game.play(choice==1);
+				int moveChoice=sc.nextInt();
+				game.play(moveChoice==1,pieceChoice);
 			}
 			game.playerEnergy = game.energy;
 			game.turn++;	
