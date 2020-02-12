@@ -11,6 +11,8 @@ public class DumbGame
 	int die1;
 	int die2;
 	int pieceCount=3;
+	int xCount=pieceCount;
+	int oCount=pieceCount;
 	int energy=4;
 	int playerEnergy;
 	int moveCost=1;
@@ -23,7 +25,7 @@ public class DumbGame
 
 	public DumbGame()
 	{
-		board= new int[16];
+		board= new int[10];
 		
 		for(int i=0;i<pieceCount;i++)
 		{
@@ -37,6 +39,8 @@ public class DumbGame
 			oLoc.add(board.length-1-i);
 			board[board.length-1-i]=oPieces.get(i);
 		}
+		xCount=pieceCount;
+		oCount=pieceCount;
 		playerEnergy = energy;
 	}
 	
@@ -118,26 +122,85 @@ public class DumbGame
 		}
 	}
 	
+	//~ public boolean attack(int token, int piece)
+	//~ {
+		//~ int currentLocation=getLocation(token,piece);
+		//~ if(token == 1) {
+			//~ attackTarget = getLocation(token,piece) + 1;
+		//~ }else{
+			//~ attackTarget = getLocation(token,piece) - 1;
+		//~ }
+		//~ if (board[attackTarget]!=token && board[attackTarget]>0)
+		//~ {
+			//~ if (playerEnergy >= attackCost)
+			//~ {
+				//~ playerEnergy = playerEnergy - attackCost;
+				//~ board[attackTarget]=0;
+				//~ return true;
+			//~ } else {
+				//~ return false;
+			//~ }
+		//~ }else{
+			//~ return false;
+		//~ }
+	//~ }
+	
 	public boolean attack(int token, int piece)
 	{
 		int currentLocation=getLocation(token,piece);
-		if(token == 1) {
-			attackTarget = getLocation(token,piece) + 1;
-		}else{
-			attackTarget = getLocation(token,piece) - 1;
-		}
-		if (board[attackTarget]!=token && board[attackTarget]>0)
+		boolean locConfirm = false;
+		int remove = 0;
+		if(token == 1) 
 		{
-			if (playerEnergy >= attackCost)
+			if(playerEnergy>=2)
 			{
-				playerEnergy = playerEnergy - attackCost;
-				board[attackTarget]=0;
-				return true;
-			} else {
+				attackTarget = getLocation(token,piece) + 1;
+				for(int i=0;i<pieceCount;i++) 
+				{
+					if(board[attackTarget]==oLoc.get(i))
+					{
+						locConfirm = true;
+						remove = i;
+					}
+				}
+				if(locConfirm){
+					oPieces.remove(remove);
+					oLoc.remove(remove);
+					oCount--;
+					board[attackTarget] = 0;
+					playerEnergy=playerEnergy-2;
+					return true;
+				} else {
+					return false;
+				}
+			}else{
 				return false;
 			}
-		}else{
-			return false;
+		} else {
+			if(playerEnergy>=2)
+			{
+				attackTarget = getLocation(token,piece) - 1;
+				for(int i=0;i<pieceCount;i++) 
+				{
+					if(board[attackTarget]==xLoc.get(i))
+					{
+						locConfirm = true;
+						remove = i;
+					}
+				}
+				if(locConfirm){
+					xPieces.remove(remove);
+					xLoc.remove(remove);
+					xCount--;
+					board[attackTarget] = 0;
+					playerEnergy=playerEnergy-2;
+					return true;
+				} else {
+					return false;
+				}
+			}else{
+				return false;
+			}
 		}
 	}
 	
@@ -182,8 +245,9 @@ public class DumbGame
 			while (game.playerEnergy >0) {
 				System.out.println(game);
 				System.out.printf("Your energy is: %d\n", game.playerEnergy);
-				System.out.printf("Which piece would you like to move?\n");	
-				System.out.printf("Enter a number piece from 0-%d\n", game.pieceCount-1);	
+				System.out.printf("Which piece would you like to move?\n");
+				if(game.getPlayer() == game.X) System.out.printf("Enter a number piece from 0-%d\n", game.xCount-1);
+				else System.out.printf("Enter a number piece from 0-%d\n", game.oCount-1);	
 				int pieceChoice=pc.nextInt();
 				System.out.printf("Would you like to move or attack?\n");
 				System.out.printf("Move is 1\nAttack is 2\n");
