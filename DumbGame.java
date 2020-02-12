@@ -77,8 +77,23 @@ public class DumbGame
 		
 	//~ }
 	
+	public int countToken(int token)
+	{
+		int count=0;
+		for(int i=0;i<board.length;i++)
+			if(board[i]==token)
+				count++;
+		return count;
+	}
+	
 	public int getLocation(int token, int piece)
 	{
+		for(int i=0;i<board.length;i++)
+		{
+			if(board[i]==token)piece--;
+			if(piece==-1) return i;
+		}
+		return -1;
 		if (token==X) 
 		{
 			return xLoc.get(piece);
@@ -99,6 +114,15 @@ public class DumbGame
 	{
 		int currentLocation=getLocation(token,piece);
 		int target=currentLocation+getDirection(token);
+		if(token==X){
+			if(xPieces.get(piece)==0){
+				return false;
+			}
+		}else if(token==O){
+			if(oPieces.get(piece)==0){
+				return false;
+			}
+		}
 		if (playerEnergy >= 1)
 		{
 			if(target<0 || target>=board.length)
@@ -122,87 +146,80 @@ public class DumbGame
 		}
 	}
 	
-	//~ public boolean attack(int token, int piece)
-	//~ {
-		//~ int currentLocation=getLocation(token,piece);
-		//~ if(token == 1) {
-			//~ attackTarget = getLocation(token,piece) + 1;
-		//~ }else{
-			//~ attackTarget = getLocation(token,piece) - 1;
-		//~ }
-		//~ if (board[attackTarget]!=token && board[attackTarget]>0)
-		//~ {
-			//~ if (playerEnergy >= attackCost)
-			//~ {
-				//~ playerEnergy = playerEnergy - attackCost;
-				//~ board[attackTarget]=0;
-				//~ return true;
-			//~ } else {
-				//~ return false;
-			//~ }
-		//~ }else{
-			//~ return false;
-		//~ }
-	//~ }
-	
 	public boolean attack(int token, int piece)
 	{
 		int currentLocation=getLocation(token,piece);
-		boolean locConfirm = false;
-		int remove = 0;
-		if(token == 1) 
+		if(token == 1) {
+			attackTarget = getLocation(token,piece) + 1;
+		}else{
+			attackTarget = getLocation(token,piece) - 1;
+		}
+		if (board[attackTarget]!=token && board[attackTarget]>0)
 		{
-			if(playerEnergy>=2)
+			if (playerEnergy >= attackCost)
 			{
-				attackTarget = getLocation(token,piece) + 1;
-				for(int i=0;i<pieceCount;i++) 
-				{
-					if(board[attackTarget]==oLoc.get(i))
-					{
-						locConfirm = true;
-						remove = i;
-					}
-				}
-				if(locConfirm){
-					oPieces.remove(remove);
-					oLoc.remove(remove);
-					oCount--;
-					board[attackTarget] = 0;
-					playerEnergy=playerEnergy-2;
+				if(token==X){
+					playerEnergy = playerEnergy - attackCost;
+					board[attackTarget]=0;
 					return true;
-				} else {
-					return false;
+				} else if(token==O){
+					playerEnergy = playerEnergy - attackCost;
+					board[attackTarget]=0;
+					return true;
 				}
-			}else{
+			} else {
 				return false;
 			}
-		} else {
-			if(playerEnergy>=2)
-			{
-				attackTarget = getLocation(token,piece) - 1;
-				for(int i=0;i<pieceCount;i++) 
-				{
-					if(board[attackTarget]==xLoc.get(i))
-					{
-						locConfirm = true;
-						remove = i;
-					}
-				}
-				if(locConfirm){
-					xPieces.remove(remove);
-					xLoc.remove(remove);
-					xCount--;
-					board[attackTarget] = 0;
-					playerEnergy=playerEnergy-2;
-					return true;
-				} else {
-					return false;
-				}
-			}else{
-				return false;
-			}
+		}else{
+			return false;
 		}
 	}
+	
+	//~ public boolean attack(int token, int piece)
+	//~ {
+		//~ int currentLocation=getLocation(token,piece);
+		//~ if(token == X) 
+		//~ {
+			//~ if(playerEnergy>=attackCost)
+			//~ {
+				//~ attackTarget = getLocation(token,piece) + 1;
+				//~ for(int i=0;i<oCount;i++) 
+				//~ {
+					//~ if(board[attackTarget]==oLoc.get(i))
+					//~ {
+						//~ oPieces.set(i, 0);
+						//~ board[attackTarget] = 0;
+						//~ oCount--;
+						//~ playerEnergy=playerEnergy-attackCost;
+						//~ return true;
+					//~ }
+				//~ }
+			//~ }else{
+				//~ return false;
+			//~ }
+		//~ } else if(token==O){
+			//~ if(playerEnergy>=attackCost)
+			//~ {
+				//~ attackTarget = getLocation(token,piece) - 1;
+				//~ for(int i=0;i<xCount;i++) 
+				//~ {
+					//~ if(board[attackTarget]==xLoc.get(i))
+					//~ {
+						//~ xPieces.set(i, 0);
+						//~ board[attackTarget] = 0;
+						//~ xCount--;
+						//~ playerEnergy=playerEnergy-attackCost;
+						//~ return true;
+					//~ }
+				//~ }
+			//~ }else{
+				//~ return false;
+			//~ }
+		//~ } else {
+			//~ return false;
+		//~ }
+		//~ return false;
+	//~ }
 	
 	public int getWinner()
 	{
