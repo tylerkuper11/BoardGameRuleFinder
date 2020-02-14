@@ -15,6 +15,9 @@ public class DumbGamev2
 	int playerEnergy;
 	int moveCost=1;
 	int attackCost=2;
+	int restCost=1;
+	int restUses=1;
+	int playerRestUses=0;
 	int xCount=pieceCount;
 	int oCount=pieceCount;
 	int attackTarget;
@@ -30,6 +33,7 @@ public class DumbGamev2
 		//~ board[0] = X;
 		//~ board[board.length-1]=O;
 		playerEnergy = energy;
+		playerRestUses = restUses;
 	}
 	
 	public int getPlayer()
@@ -54,22 +58,27 @@ public class DumbGamev2
 	{
 		int count=0;
 		if(token==X){
-			for(int i=0;i<board.length;i++)
-				if(board[i]==token)
+			for(int i=0;i<board.length;i++){
+				if(board[i]==token){
 					count++;
 					if(count==piece+1){
-						return count;
+						break;
 					}
+				}
+			}
 		}else{
-			for(int i=0;i<board.length;i++)
-				if(board[board.length-i-1]==token)
+			for(int i=0;i<board.length;i++){
+				if(board[board.length-i-1]==token){
 					count++;
 					if(count==piece+1){
-						return count;
+						break;
 					}
+				}
+			}
 		}
-		return count;
+		if(count!=piece+1) count =0;
 		
+		return count;
 	}
 	
 	public int getLocation(int token,int piece)
@@ -80,22 +89,23 @@ public class DumbGamev2
 				if(board[i]==token)piece--;
 				if(piece==-1) return i;
 			}
-			return -1;
+			return 0;
 		}else{
 			for(int i=board.length-1;i>=0;i--)
 			{
 				if(board[i]==token)piece--;
 				if(piece==-1) return i;
 			}
-			return -1;
+			return 0;
 		}
 	}
 	//~ public boolean isValid(int[] move)
 	
-	public void play(boolean useDieOne,int piece)
+	public void play(int useDieOne,int piece)
 	{
-		if(useDieOne) System.out.println(slide(getPlayer(),piece));
-		else attack(getPlayer(),piece);
+		if(useDieOne==1) System.out.println(slide(getPlayer(),piece));
+		else if (useDieOne==2) attack(getPlayer(),piece);
+		else rest(getPlayer(),piece);
 
 	}
 	
@@ -116,13 +126,13 @@ public class DumbGamev2
 		{
 			if(target<0 || target>=board.length)
 			return false;
-			board[currentLocation]=0;
 			if(board[target]>0)
 			{
 				//~ if(getDirection(token)>0)board[0]=board[target];
 				//~ else board[board.length-1]=board[target];
 				return false;
 			}
+			board[currentLocation]=0;
 			board[target]=token;
 			playerEnergy--;
 			return true;
@@ -133,10 +143,19 @@ public class DumbGamev2
 	
 	public boolean attack(int token,int piece)
 	{
+		if(token==X){
+			if(countToken(token,piece)==0){
+				return false;
+			}
+		}else if(token==O){
+			if(countToken(token,piece)==0){
+				return false;
+			}
+		}
 		int currentLocation=getLocation(token,piece);
-		if(token == 1) {
+		if(token == X) {
 			attackTarget = getLocation(token,piece) + 1;
-		}else{
+		}else if(token == O){
 			attackTarget = getLocation(token,piece) - 1;
 		}
 		if (board[attackTarget]!=token && board[attackTarget]>0)
@@ -152,6 +171,22 @@ public class DumbGamev2
 		}else{
 			return false;
 		}
+	}
+	public boolean rest(int token, int piece)
+	{
+		if(token==X){
+			if(countToken(token,piece)==0){
+				return false;
+			}
+		}else if(token==O){
+			if(countToken(token,piece)==0){
+				return false;
+			}
+		}
+		if(playerRestUses==0)return false;
+		playerEnergy=playerEnergy-restCost;
+		playerRestUses--;
+		return true;
 	}
 	
 	public int getWinner()
@@ -196,11 +231,13 @@ public class DumbGamev2
 		System.out.println(game);
 		while(game.getWinner()==0)
 		{
-			System.out.printf("+---------------------------+\n");
-			System.out.printf("| "+game.getPlayerCharacter()+"'s turn                  |\n");
-			System.out.printf("| A move costs %d energy     |\n",game.moveCost);
-			System.out.printf("| An attack costs %d energy  |\n",game.attackCost);
-			System.out.printf("+---------------------------+\n");
+			System.out.printf("+------------------------------------+\n");
+			System.out.printf("| "+game.getPlayerCharacter()+"'s turn                           |\n");
+			System.out.printf("| A move costs %d energy              |\n",game.moveCost);
+			System.out.printf("| An attack costs %d energy           |\n",game.attackCost);
+			System.out.printf("| Resting costs %d energy             |\n",game.restCost);
+			System.out.printf("| (YOU CAN ONLY REST ONCE PER TURN)  |\n");
+			System.out.printf("+------------------------------------+\n");
 			while (game.playerEnergy >0) {
 				System.out.println(game);
 				System.out.printf("Your energy is: %d\n", game.playerEnergy);
@@ -208,14 +245,17 @@ public class DumbGamev2
 				if(game.getPlayer() == game.X) System.out.printf("Enter a number piece from 0-%d\n", game.xCount-1);
 				else System.out.printf("Enter a number piece from 0-%d\n", game.oCount-1);	
 				int pieceChoice=pc.nextInt();
-				System.out.printf("Would you like to move or attack?\n");
-				System.out.printf("Move is 1\nAttack is 2\n");
+				System.out.printf("Would you like to move, attack, or rest?\n");
+				System.out.printf("Move is 1\nAttack is 2\nRest is 3\n");
 				int moveChoice=sc.nextInt();
-				game.play(moveChoice==1,pieceChoice);
+				game.play(moveChoice,pieceChoice);
 			}
 			game.playerEnergy = game.energy;
+			game.playerRestUses = game.restUses;
 			game.turn++;		
 		}
+		if(game.getWinner()== game.X) System.out.println("X Wins!!");
+		else System.out.println("O Wins!!");
 	}
  
 }
