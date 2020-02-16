@@ -8,11 +8,12 @@ public class DumbGamev2
 	int X=1;
 	int O=2;
 	int turn=0;
-	int die1;
-	int die2;
 	int pieceCount=3;
 	int energy=4;
 	int playerEnergy;
+	int move = 1;
+	int attack = 2;
+	int rest = 3;
 	int moveCost=1;
 	int attackCost=2;
 	int restCost=1;
@@ -21,6 +22,18 @@ public class DumbGamev2
 	int xCount=pieceCount;
 	int oCount=pieceCount;
 	int attackTarget;
+
+	public DumbGamev2 clone()
+	{
+		DumbGamev2 game=new DumbGamev2();
+		for(int i=0;i<board.length;i++)game.board[i]=board[i];
+		game.turn=turn;
+		game.playerEnergy=playerEnergy;
+		game.playerRestUses=playerRestUses;
+		game.xCount=xCount;
+		game.oCount=oCount;
+		return game;
+	}
 
 	public DumbGamev2()
 	{
@@ -99,9 +112,75 @@ public class DumbGamev2
 			return 0;
 		}
 	}
-	//~ public boolean isValid(int[] move)
 	
-	public void play(int useDieOne,int piece)
+	public int[][] possibleMoves()
+	{
+		int[][] validMoves = new int[9][2];
+		int count = 0;
+		int listR = 0;
+		if(getPlayer()==X){
+			for(int i=0;i<board.length;i++)
+			{
+				if(board[i]==X){
+					if(board[i+1]==O&&playerEnergy>=attackCost){
+						validMoves[listR][0]= count;
+						validMoves[listR][1]= attack;
+						listR++;
+					}
+					if(board[i+1]==0&&playerEnergy>=moveCost){
+						validMoves[listR][0]=count;
+						validMoves[listR][1]=move;
+						listR++;
+					}
+					if(playerEnergy>=1){
+						validMoves[listR][0]=count;
+						validMoves[listR][1]=rest;
+						listR++;
+					}
+					count++;
+				}
+			}
+		}
+		if(getPlayer()==O){
+			for(int i=board.length-1;i>0;i--)
+			{
+				if(board[i]==O){
+					if(board[i-1]==X&&playerEnergy>=attackCost){
+						validMoves[listR][0]= count;
+						validMoves[listR][1]= attack;
+						listR++;
+					}
+					if(board[i-1]==0&&playerEnergy>=moveCost){
+						validMoves[listR][0]=count;
+						validMoves[listR][1]=move;
+						listR++;
+					}
+					if(playerEnergy>=1){
+						validMoves[listR][0]=count;
+						validMoves[listR][1]=rest;
+						listR++;
+					}
+					count++;
+				}
+						
+			}
+		}
+		int[][] out=new int[listR][2];
+		for(int i=0;i<out.length;i++)out[i]=validMoves[i];
+		
+		for(int[] row: out)
+			System.out.println(Arrays.toString(row));
+		return out;
+	}
+	
+	public DumbGamev2 play(int type, int piece)
+	{
+		DumbGamev2 game=clone();
+		game.private_play(type,piece);
+		return game;
+	}
+	
+	private void private_play(int useDieOne,int piece)
 	{
 		if(useDieOne==1) System.out.println(slide(getPlayer(),piece));
 		else if (useDieOne==2) attack(getPlayer(),piece);
@@ -239,6 +318,7 @@ public class DumbGamev2
 			System.out.printf("| (YOU CAN ONLY REST ONCE PER TURN)  |\n");
 			System.out.printf("+------------------------------------+\n");
 			while (game.playerEnergy >0) {
+				System.out.println(game.possibleMoves());
 				System.out.println(game);
 				System.out.printf("Your energy is: %d\n", game.playerEnergy);
 				System.out.printf("Which piece would you like to move?\n");
@@ -248,7 +328,7 @@ public class DumbGamev2
 				System.out.printf("Would you like to move, attack, or rest?\n");
 				System.out.printf("Move is 1\nAttack is 2\nRest is 3\n");
 				int moveChoice=sc.nextInt();
-				game.play(moveChoice,pieceChoice);
+				game=game.play(moveChoice,pieceChoice);
 			}
 			game.playerEnergy = game.energy;
 			game.playerRestUses = game.restUses;
@@ -259,3 +339,5 @@ public class DumbGamev2
 	}
  
 }
+
+
